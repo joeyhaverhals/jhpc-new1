@@ -246,4 +246,50 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                   />
                 </div>
                 {registerForm.formState.errors.email && (
-                  <p className="mt-1 text-sm text-red-
+                  <p className="mt-1 text-sm text-red-400">
+                    {registerForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60" />
+                  <input
+                    type="password"
+                    {...registerForm.register('password')}
+                    className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg
+                             text-white placeholder-white/60 focus:outline-none focus:ring-2
+                             focus:ring-purple-500"
+                    placeholder="••••••••"
+                  />
+                </div>
+                {registerForm.formState.errors.password && (
+                  <p className="mt-1 text-sm text-red-400">
+                    {registerForm.formState.errors.password.message}
+                  </p>
+                )}
+              </div>
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center justify-center px-8 py-4
+                         bg-gradient-to-r from-purple-600 to-blue-600
+                         rounded-lg text-white font-medium"
+              >
+                Sign Up
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </motion.button>
+              {/* Add any closing tags as necessary */}
+              </motion.form>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default AuthModal;
