@@ -1,10 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import Login from '@/pages/auth/Login';
 import Website from '@/pages/Website';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 // Admin Pages
 import Dashboard from '@/pages/admin/Dashboard';
@@ -18,43 +17,48 @@ import Analytics from '@/pages/admin/Analytics';
 import Users from '@/pages/admin/Users';
 import About from '@/pages/admin/About';
 
-const App: React.FC = () => {
-  const { isLoading, error } = useAuth();
+// Protected Route Component
+const ProtectedRoute: React.FC<{
+  children: React.ReactNode;
+  requiredRole?: string;
+}> = ({ children, requiredRole }) => {
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-red-50 p-4 rounded-md">
-          <p className="text-red-700">Error: {error}</p>
-          <p className="text-sm text-red-500 mt-2">
-            Please check your environment variables and Supabase configuration.
-          </p>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return <Navigate to="/" replace />;
   }
 
+  if (requiredRole && user.user_metadata?.role !== requiredRole) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Website />} />
-        <Route path="/login" element={<Login />} />
 
         {/* Protected Admin Routes */}
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Dashboard />} />
           <Route path="posts" element={<Posts />} />
           <Route path="services" element={<Services />} />
@@ -63,15 +67,11 @@ const App: React.FC = () => {
           <Route path="media" element={<Media />} />
           <Route path="ai-chat" element={<AIChatManagement />} />
           <Route path="analytics" element={<Analytics />} />
-          <Route path="users" element={
-            <ProtectedRoute requiredRole="admin">
-              <Users />
-            </ProtectedRoute>
-          } />
+          <Route path="users" element={<Users />} />
           <Route path="about" element={<About />} />
         </Route>
 
-        {/* 404 - Catch all */}
+        {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
